@@ -1,0 +1,337 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prizmdoc-server-config
+data:
+  # See https://help.accusoft.com/PrizmDoc/preview/HTML/central-configuration.html
+  # for details on configuring Prizmdoc Server
+  prizm-services-config.yml: |-
+    license.key: YOUR_LICENSE_KEY
+    license.solutionName: YOUR_SOLUTION_NAME
+    network.publicPort: 18681
+    network.internalStartingPort: 19000
+    network.clustering.enabled: true
+    network.clustering.clusterPort: 18682
+    logging.directory: "/logs"
+    logging.daysToKeep: 1
+    cache.directory: "/data/cache"
+    workFiles.directory: "/data/cache/workfileCache"
+    userDocuments.directory: "/data/cache/userDocuments"
+    viewing.allowDocumentDownload: true
+    #viewingPackagesMetadata.storage: "database"
+    #viewingPackagesArtifacts.storage: "s3"
+    #database.connectionString: "mysql://root:root@mysql.prizmdoc.svc.cluster.local:3306/prizmdb"
+    #viewingPackagesArtifacts.s3BucketName: "myS3Bucket"
+    #viewingPackagesArtifacts.path: "PDV/ViewingPackages"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prizmdoc-server-logs
+  labels:
+    app.kubernetes.io/name: prizmdoc-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prizmdoc-server-headless
+  labels:
+    app.kubernetes.io/name: prizmdoc-server
+    app.kubernetes.io/component: headless-service
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prizmdoc-server
+  clusterIP: None
+  ports:
+    - name: public
+      port: 18681
+      protocol: TCP
+      targetPort: public
+    - name: internal
+      port: 18682
+      protocol: TCP
+      targetPort: internal
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: prizmdoc-server
+  labels:
+    app.kubernetes.io/name: prizmdoc-server
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prizmdoc-server
+  serviceName: prizmdoc-server-headless
+  replicas: 2
+  podManagementPolicy: Parallel
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prizmdoc-server
+    spec:
+      initContainers:
+        # Wait for the MySQL to become ready.
+        # The PrizmDoc Server may fail to start if MySQL is unavailable.
+        - name: wait-mysql
+          command:
+            - bash
+            - "-c"
+            - for i in {0..30}; do sleep 5; if mysql --user=root --password=root --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
+          image: bitnami/mysql:5.7.36-debian-10-r13
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "0"
+              memory: "0"
+            requests:
+              cpu: "0"
+              memory: "0"
+      containers:
+        - name: prizmdoc-server
+          image: docker.io/accusoft/prizmdoc-server:preview
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ACCEPT_EULA
+              value: "YES"
+            - name: AWS_REGION
+              value: YOUR_AWS_REGION
+            - name: AWS_ACCESS_KEY_ID
+              value: YOUR_AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              value: YOUR_AWS_SECRET_ACCESS_KEY
+          ports:
+            - name: public
+              containerPort: 18681
+              protocol: TCP
+            - name: internal
+              containerPort: 18682
+              protocol: TCP
+          volumeMounts:
+            - name: prizmdoc-server-config
+              mountPath: /config
+              readOnly: true
+            - name: prizmdoc-server-data
+              mountPath: /data
+            - name: prizmdoc-server-logs-internal
+              mountPath: /logs
+          resources:
+            limits:
+              cpu: "2.0"
+              memory: 6Gi
+            requests:
+              cpu: "2.0"
+              memory: 6Gi
+          livenessProbe:
+            httpGet:
+              path: /PCCIS/V1/Service/Current/Health
+              port: internal
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /PCCIS/V1/Service/Current/Health
+              port: internal
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 5
+        - name: prizmdoc-server-logging-agent
+          image: docker.io/fluent/fluent-bit:1.8.10
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: prizmdoc-server-fluent-config
+              mountPath: /fluent-bit/etc/
+            - name: prizmdoc-server-logs-internal
+              mountPath: /logs
+            - name: prizmdoc-server-logs
+              mountPath: /processed-logs
+          resources:
+            limits:
+              cpu: "0"
+              memory: "0"
+            requests:
+              cpu: "0"
+              memory: "0"
+      volumes:
+        - name: prizmdoc-server-config
+          configMap:
+            name: prizmdoc-server-config
+        - name: prizmdoc-server-logs-internal
+          emptyDir: {}
+        - name: prizmdoc-server-logs
+          persistentVolumeClaim:
+            claimName: prizmdoc-server-logs
+        - name: prizmdoc-server-fluent-config
+          configMap:
+            name: prizmdoc-server-fluent-config
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+    - metadata:
+        name: prizmdoc-server-data
+        labels:
+          app.kubernetes.io/name: prizmdoc-server
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 4Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prizmdoc-server
+  labels:
+    app.kubernetes.io/name: prizmdoc-server
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: prizmdoc-server
+  ports:
+    - name: public
+      port: 18681
+      protocol: TCP
+      targetPort: public
+    - name: internal
+      port: 18682
+      protocol: TCP
+      targetPort: internal
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prizmdoc-server
+  labels:
+    app.kubernetes.io/name: prizmdoc-server
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              service:
+                name: prizmdoc-server
+                port:
+                  name: public
+            path: /prizmdoc-server(/|$)(.*)
+            pathType: Prefix
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prizmdoc-server-fluent-config
+data:
+  fluent-bit.conf: |-
+    [SERVICE]
+        Flush           5
+        Daemon          off
+        Parsers_File    parsers.conf
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<pccis>.<file_name>
+        Tag_Regex       /logs/(?<pccis>Pccis[012])/(?<file_name>.*)
+        Path            /logs/Pccis[012]/ImagingServices.log
+        DB              /logs/logs.db
+        Parser          json
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   25MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<pccis>.<file_name>
+        Tag_Regex       /logs/(?<pccis>Pccis[012])/(?<file_name>.*)
+        Path            /logs/Pccis[012]/console.log
+        DB              /logs/logs.db
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   1MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<file_name>
+        Tag_Regex       /logs/(?<file_name>.*)
+        Path            /logs/*.log
+        Exclude_Path    /logs/*.*.log,/logs/PccErrors.log,/logs/FileViewer.log,/logs/mongod.log
+        DB              /logs/logs.db
+        Parser          json
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   25MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<file_name>
+        Tag_Regex       /logs/(?<file_name>.*)
+        Path            /logs/plb.*.log
+        DB              /logs/logs.db
+        Parser          json
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   25MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<file_name>
+        Tag_Regex       /logs/(?<file_name>.*)
+        Path            /logs/PccErrors.log
+        DB              /logs/logs.db
+        Parser          json
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   2MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<file_name>
+        Tag_Regex       /logs/(?<file_name>.*)
+        Path            /logs/mongod.log
+        DB              /logs/logs.db
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   2MB
+
+    [INPUT]
+        Name            tail
+        Tag             ${POD_NAME}.<file_name>
+        Tag_Regex       /logs/(?<file_name>.*)
+        Path            /logs/*.console*.log
+        DB              /logs/logs.db
+        Read_from_Head  True
+        Skip_Long_Lines On
+        Mem_Buf_Limit   2MB
+
+    [OUTPUT]
+        Name            file
+        Match           *
+        Format          plain
+        Path            /processed-logs
+  parsers.conf: |-
+    [PARSER]
+        Name            json
+        Format          json
+        Time_Key        time
+        Time_Format     %Y-%m-%dT%H:%M:%S.%LZ
+        Time_Keep       On

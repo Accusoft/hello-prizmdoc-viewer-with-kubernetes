@@ -1,0 +1,102 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prizmdoc-cluster-manager
+  labels:
+    app.kubernetes.io/name: prizmdoc-cluster-manager
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prizmdoc-cluster-manager
+  labels:
+    app.kubernetes.io/name: prizmdoc-cluster-manager
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prizmdoc-cluster-manager
+  labels:
+    app.kubernetes.io/name: prizmdoc-cluster-manager
+roleRef:
+  name: prizmdoc-cluster-manager
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+subjects:
+  - name: prizmdoc-cluster-manager
+    apiGroup: ""
+    kind: ServiceAccount
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prizmdoc-cluster-manager
+  labels:
+    app.kubernetes.io/name: prizmdoc-cluster-manager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prizmdoc-cluster-manager
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prizmdoc-cluster-manager
+    spec:
+      containers:
+        - name: prizmdoc-cluster-manager
+          image: docker.io/accusoft/prizmdoc-cluster-manager:preview
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVICE_PORT
+              value: "8080"
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: LABEL_SELECTOR
+              value: app.kubernetes.io/name=prizmdoc-server,app.kubernetes.io/component=headless-service
+            - name: PUBLIC_PORT
+              value: "18681"
+            - name: CLUSTER_PORT
+              value: "18682"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: http
+              scheme: HTTP
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+              scheme: HTTP
+          securityContext:
+            readOnlyRootFilesystem: true
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      serviceAccountName: prizmdoc-cluster-manager
