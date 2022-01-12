@@ -51,8 +51,8 @@ kubectl get all --namespace prizmdoc
 ### 3. Check health
 
 It may take a few minutes to pull all the container images and complete the deployment. But, once fully started, you can use the following HTTP requests to check application health:
-* `GET http://<your-ingress-address>:<port>/PCCIS/V1/Service/Current/Health` should return HTTP 200, indicating PrizmDoc Server is healthy (while starting, this request will return nothing or an error).
-* `GET http://<your-ingress-address>:<port>/prizmdoc/health` should return HTTP 200, indicating PrizmDoc Application Services component is healthy.
+* `GET http://<your-ingress-address>:<port>/prizmdoc-server/PCCIS/V1/Service/Current/Health` should return HTTP 200, indicating PrizmDoc Server is healthy (while starting, this request will return nothing or an error).
+* `GET http://<your-ingress-address>:<port>/prizmdoc-application-services/health` should return HTTP 200, indicating PrizmDoc Application Services component is healthy.
 
 Use external IP address and port of your Ingress controller service. The PrizmDoc Server API should be available at `/prizmdoc-server` route, the PAS API should be available at `/prizmdoc-application-services` route.
 
