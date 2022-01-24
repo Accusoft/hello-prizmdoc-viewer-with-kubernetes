@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: prizmdoc-cluster-manager
-          image: docker.io/accusoft/prizmdoc-cluster-manager:preview
+          image: docker.io/accusoft/prizmdoc-cluster-manager:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: SERVICE_PORT

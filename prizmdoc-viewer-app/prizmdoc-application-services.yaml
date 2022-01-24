@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: prizmdoc-application-services-config
 data:
-  # See https://help.accusoft.com/PrizmDoc/preview/HTML/pas-configuration.html
+  # See https://help.accusoft.com/PrizmDoc/latest/HTML/pas-configuration.html
   # for details on configuring Prizmdoc Application Services
   pcc.nix.yml: |-
     port: 3000
@@ -101,7 +101,7 @@ spec:
               memory: "0"
       containers:
         - name: prizmdoc-application-services
-          image: docker.io/accusoft/prizmdoc-application-services:preview
+          image: docker.io/accusoft/prizmdoc-application-services:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ACCEPT_EULA

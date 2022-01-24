@@ -74,13 +74,14 @@ Now you can run one of [Sample Applications] with your PrizmDoc Viewer deployed 
 [Ingress controller]: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
 [NGINX Ingress Controller]: https://bitnami.com/stack/nginx-ingress-controller/helm
 [helm]: https://helm.sh/
-[Deployment to Kubernetes Guidance]: https://help.accusoft.com/PrizmDoc/preview/HTML/deployment-to-kubernetes-guidance.html
-[Configure the PrizmDoc Server]: https://help.accusoft.com/PrizmDoc/preview/HTML/configure-the-prizmdoc-server.html
+[Deployment to Kubernetes Guidance]: https://help.accusoft.com/PrizmDoc/latest/HTML/deployment-to-kubernetes-guidance.html
+[Configure the PrizmDoc Server]: https://help.accusoft.com/PrizmDoc/latest/HTML/configure-the-prizmdoc-server.html
 [Accusoft PDF Viewer]: https://www.accusoft.com/products/pdf-collection/accusoft-pdf-viewer/
-[Integration with the Accusoft PDF Viewer]: https://help.accusoft.com/PrizmDoc/preview/HTML/integration-with-pdf-viewer.html
-["v3" Viewing Packages API]: https://help.accusoft.com/PrizmDoc/preview/HTML/pre-convert-documents-for-pdf-viewer.html
-[Sample Applications]: https://help.accusoft.com/PrizmDoc/preview/HTML/viewer-samples.html
-[Configuring Storage]: https://help.accusoft.com/PrizmDoc/preview/HTML/pas-configuration.html#configuring-storage
-[Copyright Information]: https://help.accusoft.com/PrizmDoc/preview/HTML/copyright-information.html
-[PrizmDoc Viewer Overview]: https://help.accusoft.com/PrizmDoc/preview/HTML/prizmdoc-overview.html
-[PrizmDoc Kubernetes Guidance]: https://help.accusoft.com/PrizmDoc/preview/HTML/kubernetes-overview.html
+[Integration with the Accusoft PDF Viewer]: https://help.accusoft.com/PrizmDoc/latest/HTML/integration-with-pdf-viewer.html
+["v3" Viewing Packages API]: https://help.accusoft.com/PrizmDoc/latest/HTML/pre-convert-documents-for-pdf-viewer.html
+[Sample Applications]: https://help.accusoft.com/PrizmDoc/latest/HTML/viewer-samples.html
+[Configuring Storage]: https://help.accusoft.com/PrizmDoc/latest/HTML/pas-configuration.html#configuring-storage
+[Copyright Information]: https://help.accusoft.com/PrizmDoc/latest/HTML/copyright-information.html
+[PrizmDoc Viewer Overview]: https://help.accusoft.com/PrizmDoc/latest/HTML/prizmdoc-overview.html
+[PrizmDoc Kubernetes Guidance]: https://help.accusoft.com/PrizmDoc/latest/HTML/kubernetes-overview.html
+[Supported Kubernetes Versions]: https://help.accusoft.com/PrizmDoc/latest/HTML/supported-kubernetes.html

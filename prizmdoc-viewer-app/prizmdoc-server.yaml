@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: prizmdoc-server-config
 data:
-  # See https://help.accusoft.com/PrizmDoc/preview/HTML/central-configuration.html
+  # See https://help.accusoft.com/PrizmDoc/latest/HTML/central-configuration.html
   # for details on configuring Prizmdoc Server
   prizm-services-config.yml: |-
     license.key: YOUR_LICENSE_KEY
@@ -97,7 +97,7 @@ spec:
               memory: "0"
       containers:
         - name: prizmdoc-server
-          image: docker.io/accusoft/prizmdoc-server:preview
+          image: docker.io/accusoft/prizmdoc-server:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ACCEPT_EULA
