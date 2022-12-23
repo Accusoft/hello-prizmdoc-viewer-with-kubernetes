@@ -21,7 +21,7 @@ data:
     viewing.allowDocumentDownload: true
     #viewingPackagesMetadata.storage: "database"
     #viewingPackagesArtifacts.storage: "s3"
-    #database.connectionString: "mysql://root:root@mysql.prizmdoc.svc.cluster.local:3306/prizmdb"
+    #database.connectionString: "mysql://user:password@mysql.prizmdoc.svc.cluster.local:3306/prizmdb"
     #viewingPackagesArtifacts.s3BucketName: "myS3Bucket"
     #viewingPackagesArtifacts.path: "PDV/ViewingPackages"
 ---
@@ -84,24 +84,24 @@ spec:
         - name: wait-mysql
           command:
             - bash
-            - "-c"
-            - for i in {0..30}; do sleep 5; if mysql --user=root --password=root --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
+            - '-c'
+            - for i in {0..30}; do sleep 5; if mysql --user=user --password=password --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
           image: bitnami/mysql:5.7.36-debian-10-r13
           imagePullPolicy: IfNotPresent
           resources:
             limits:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
             requests:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
       containers:
         - name: prizmdoc-server
           image: docker.io/accusoft/prizmdoc-server:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ACCEPT_EULA
-              value: "YES"
+              value: 'YES'
             - name: AWS_REGION
               value: YOUR_AWS_REGION
             - name: AWS_ACCESS_KEY_ID
@@ -125,10 +125,10 @@ spec:
               mountPath: /logs
           resources:
             limits:
-              cpu: "2.0"
+              cpu: '2.0'
               memory: 6Gi
             requests:
-              cpu: "2.0"
+              cpu: '2.0'
               memory: 6Gi
           livenessProbe:
             httpGet:
@@ -163,11 +163,11 @@ spec:
               mountPath: /processed-logs
           resources:
             limits:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
             requests:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
       volumes:
         - name: prizmdoc-server-config
           configMap:
@@ -221,9 +221,9 @@ metadata:
   labels:
     app.kubernetes.io/name: prizmdoc-server
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '120'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '120'
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:

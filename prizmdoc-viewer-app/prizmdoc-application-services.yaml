@@ -37,7 +37,7 @@ data:
     viewingPackagesArtifacts.storage: "filesystem"
     viewingPackagesArtifacts.path: "/data/viewingPackages"
     database.adapter: "mysql"
-    database.connectionString: "mysql://root:root@mysql.prizmdoc.svc.cluster.local:3306/prizmdb"
+    database.connectionString: "mysql://user:password@mysql.prizmdoc.svc.cluster.local:3306/prizmdb"
     feature.viewingPackages: "enabled"
 ---
 apiVersion: v1
@@ -90,22 +90,22 @@ spec:
           imagePullPolicy: IfNotPresent
           command:
             - bash
-            - "-c"
-            - for i in {0..30}; do sleep 5; if mysql --user=root --password=root --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
+            - '-c'
+            - for i in {0..30}; do sleep 5; if mysql --user=user --password=password --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
           resources:
             limits:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
             requests:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
       containers:
         - name: prizmdoc-application-services
           image: docker.io/accusoft/prizmdoc-application-services:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: ACCEPT_EULA
-              value: "YES"
+              value: 'YES'
           ports:
             - name: public
               containerPort: 3000
@@ -155,11 +155,11 @@ spec:
               mountPath: /processed-logs
           resources:
             limits:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
             requests:
-              cpu: "0"
-              memory: "0"
+              cpu: '0'
+              memory: '0'
       volumes:
         - name: prizmdoc-application-services-config
           configMap:
@@ -199,9 +199,9 @@ metadata:
   labels:
     app.kubernetes.io/name: prizmdoc-application-services
   annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-body-size: '0'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '120'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '120'
     nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:

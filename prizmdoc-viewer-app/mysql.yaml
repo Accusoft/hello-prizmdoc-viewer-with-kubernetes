@@ -19,6 +19,7 @@ metadata:
 type: Opaque
 data:
   mysql-root-password: cm9vdA==
+  mysql-user-password: cGFzc3dvcmQ=
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -112,6 +113,16 @@ data:
         `updatedAt` datetime DEFAULT NULL,
         PRIMARY KEY (`renderedKey`)
     ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+    CREATE TABLE IF NOT EXISTS `prizmdoc_report` (
+        `renderedKey` varchar(255) NOT NULL,
+        `id` VARCHAR(64),
+        `report` VARCHAR(256),
+        `period` DATETIME UNIQUE,
+        `createdAt` datetime DEFAULT NULL,
+        `updatedAt` datetime DEFAULT NULL,
+        PRIMARY KEY (`renderedKey`),
+        KEY `id` (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
     ALTER TABLE `prizmdoc_viewingpackage`
     ADD COLUMN `accusoftTenantId` varchar(255) DEFAULT NULL;
     ALTER TABLE `prizmdoc_process` MODIFY `processJson` longtext CHARACTER SET utf8mb4;
@@ -195,6 +206,13 @@ spec:
                   name: mysql
             - name: MYSQL_DATABASE
               value: prizmdb
+            - name: MYSQL_USER
+              value: user
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: mysql-user-password
+                  name: mysql
           ports:
             - name: mysql
               containerPort: 3306
@@ -215,7 +233,7 @@ spec:
             exec:
               command:
                 - /bin/bash
-                - "-ec"
+                - '-ec'
                 - |
                   password_aux="${MYSQL_ROOT_PASSWORD:-}"
                   mysqladmin status -uroot -p"${password_aux}"
@@ -228,7 +246,7 @@ spec:
             exec:
               command:
                 - /bin/bash
-                - "-ec"
+                - '-ec'
                 - |-
                   password_aux="${MYSQL_ROOT_PASSWORD:-}"
                   mysqladmin status -uroot -p"${password_aux}"
@@ -241,7 +259,7 @@ spec:
             exec:
               command:
                 - /bin/bash
-                - "-ec"
+                - '-ec'
                 - |-
                   password_aux="${MYSQL_ROOT_PASSWORD:-}"
                   mysqladmin status -uroot -p"${password_aux}"
