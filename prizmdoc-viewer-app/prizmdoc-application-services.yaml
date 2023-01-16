@@ -202,7 +202,8 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: '0'
     nginx.ingress.kubernetes.io/proxy-read-timeout: '120'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '120'
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/use-regex: 'true'    
 spec:
   rules:
     - http:
@@ -212,7 +213,7 @@ spec:
                 name: prizmdoc-application-services
                 port:
                   name: public
-            path: /prizmdoc-application-services(/|$)(.*)
+            path: /prizmdoc-application-services/(.*)
             pathType: Prefix
 ---
 apiVersion: v1
