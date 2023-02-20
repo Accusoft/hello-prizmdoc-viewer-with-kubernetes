@@ -22,114 +22,6 @@ data:
   mysql-user-password: cGFzc3dvcmQ=
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mysql-init
-  labels:
-    app.kubernetes.io/component: primary
-    app.kubernetes.io/instance: mysql
-    app.kubernetes.io/name: mysql
-data:
-  mysql-pas-schema.sql: |-
-    -- This script was generated using the proccess described in:
-    -- https://help.accusoft.com/PrizmDoc/latest/HTML/run-database-scripts.html
-
-    CREATE TABLE IF NOT EXISTS `prizmdoc_process` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` varchar(255) DEFAULT NULL,
-        `expirationDateTime` datetime DEFAULT NULL,
-        `state` int(11) DEFAULT NULL,
-        `percentComplete` int(11) DEFAULT NULL,
-        `processJson` longtext,
-        `type` int(11) DEFAULT NULL,
-        `errorCode` varchar(255) DEFAULT NULL,
-        `outputJson` longtext,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    CREATE TABLE IF NOT EXISTS `prizmdoc_viewingpackage` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` varchar(255) DEFAULT NULL,
-        `compositeIndex` varchar(45) NOT NULL,
-        `parentId` varchar(255) DEFAULT NULL,
-        `documentId` varchar(255) DEFAULT NULL,
-        `attachmentIndex` int(11) DEFAULT NULL,
-        `deletionState` varchar(255) DEFAULT NULL,
-        `state` int(11) DEFAULT NULL,
-        `errorCode` varchar(255) DEFAULT NULL,
-        `expirationDateTime` datetime DEFAULT NULL,
-        `optionsJson` longtext,
-        `pageFailuresJson` longtext,
-        `attachmentsJson` longtext,
-        `sessionDataJson` longtext,
-        `generationProcessId` varchar(255) DEFAULT NULL,
-        `generationState` int(11) DEFAULT NULL,
-        `generationAttempt` int(11) DEFAULT NULL,
-        `generationExpirationDateTime` datetime DEFAULT NULL,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`),
-        UNIQUE KEY `compositeIndex` (`compositeIndex`),
-        KEY `documentId` (`documentId`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    CREATE TABLE IF NOT EXISTS `prizmdoc_viewingpackageartifactsmeta` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` varchar(255) DEFAULT NULL,
-        `packageId` varchar(255) DEFAULT NULL,
-        `group` int(11) DEFAULT NULL,
-        `type` int(11) DEFAULT NULL,
-        `statusCode` int(11) DEFAULT NULL,
-        `statusMessage` varchar(255) DEFAULT NULL,
-        `headers` longtext,
-        `pageIndex` int(11) DEFAULT NULL,
-        `contentType` int(11) DEFAULT NULL,
-        `scale` float DEFAULT NULL,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`),
-        KEY `packageId` (`packageId`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    CREATE TABLE IF NOT EXISTS `prizmdoc_viewingsessionprocessmeta` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` varchar(255) DEFAULT NULL,
-        `viewingSessionId` text,
-        `expirationDateTime` datetime DEFAULT NULL,
-        `type` int(11) DEFAULT NULL,
-        `affinityToken` text,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    CREATE TABLE IF NOT EXISTS `prizmdoc_viewingsession` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` varchar(255) DEFAULT NULL,
-        `expirationDateTime` datetime DEFAULT NULL,
-        `packageId` varchar(255) DEFAULT NULL,
-        `inputJson` longtext,
-        `metadataJson` longtext,
-        `state` int(11) DEFAULT NULL,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    CREATE TABLE IF NOT EXISTS `prizmdoc_report` (
-        `renderedKey` varchar(255) NOT NULL,
-        `id` VARCHAR(64),
-        `report` VARCHAR(256),
-        `period` DATETIME UNIQUE,
-        `createdAt` datetime DEFAULT NULL,
-        `updatedAt` datetime DEFAULT NULL,
-        PRIMARY KEY (`renderedKey`),
-        KEY `id` (`id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-    ALTER TABLE `prizmdoc_viewingpackage`
-    ADD COLUMN `accusoftTenantId` varchar(255) DEFAULT NULL;
-    ALTER TABLE `prizmdoc_process` MODIFY `processJson` longtext CHARACTER SET utf8mb4;
-    ALTER TABLE `prizmdoc_viewingpackage` MODIFY `optionsJson` longtext CHARACTER SET utf8mb4;
-    ALTER TABLE `prizmdoc_viewingpackage` MODIFY `sessionDataJson` longtext CHARACTER SET utf8mb4;
----
-apiVersion: v1
 kind: Service
 metadata:
   name: mysql-headless
@@ -220,8 +112,6 @@ spec:
           volumeMounts:
             - name: mysql-data
               mountPath: /bitnami/mysql
-            - name: mysql-init
-              mountPath: /docker-entrypoint-initdb.d
           resources:
             limits:
               cpu: 500m
@@ -273,10 +163,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 1001
       serviceAccountName: mysql
-      volumes:
-        - name: mysql-init
-          configMap:
-            name: mysql-init
   updateStrategy:
     type: RollingUpdate
   volumeClaimTemplates:
