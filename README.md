@@ -7,6 +7,7 @@ This example provides manifest files that allow you to get a PrizmDoc Viewer clu
 1. Kubernetes cluster where PrizmDoc Viewer application will be deployed. Also see [Supported Kubernetes Versions].
 2. Your [kubectl] tool should be configured to use your Kubernetes server. Your Kubernetes server provider may provide a tool to generate a [kubeconfig] file for this.
 3. [Ingress controller] to manage external access to the services in the cluster. You can choose the ingress controller implementation that best fits your cluster, but you may start from installing [NGINX Ingress Controller] with [helm] package manager:
+
     ```sh
     $ helm repo add bitnami https://charts.bitnami.com/bitnami
     $ helm repo update
@@ -17,6 +18,7 @@ This example provides manifest files that allow you to get a PrizmDoc Viewer clu
     --set defaultBackend.enabled=false \
     --set watchIngressWithoutClass=true
     ```
+
 4. [Dynamic Volume Provisioning] being enabled, or a manually created [Persistent Volume]. Usually cloud environments provide Dynamic Volume Provisioning.
 
 ## Deploying PrizmDoc Viewer
@@ -25,7 +27,7 @@ This example provides manifest files that allow you to get a PrizmDoc Viewer clu
 
 All manifest files can be found in the [prizmdoc-viewer-app](./prizmdoc-viewer-app) folder. See [Deployment to Kubernetes Guidance] documentation for informantion about resources used in the manifest files.
 
-PrizmDoc Server is configured with `prizmdoc-server-config` in the [prizmdoc-server.yaml](prizmdoc-viewer-app/prizmdoc-server.yaml) manifest file. See the [Configure the PrizmDoc Server] for information about available options. At a minimum, for a production deployment, you will want to at least configure your license with `license.key` and `license.solutionName`. 
+PrizmDoc Server is configured with `prizmdoc-server-config` in the [prizmdoc-server.yaml](prizmdoc-viewer-app/prizmdoc-server.yaml) manifest file. See the [Configure the PrizmDoc Server] for information about available options. At a minimum, for a production deployment, you will want to at least configure your license with `license.key` and `license.solutionName`.
 
 Additionally, if you want to integrate your PrizmDoc Server cluster with the [Accusoft PDF Viewer], you will need to enable ["v3" Viewing Packages API] in the `prizmdoc-server-config` and set your AWS credentials (env variables `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_REGION`). See [Integration with the Accusoft PDF Viewer] for configuration details.
 
@@ -34,16 +36,19 @@ _**NOTE:** this sample uses `ReadWriteOnce` access mode for `prizmdoc-applicatio
 ### 2. Deploy PrizmDoc Viewer to Kubernetes
 
 First, create a namespace for the PrizmDoc Viewer:
+
 ```sh
 kubectl create ns prizmdoc
 ```
 
 Then deploy all manifest files with:
+
 ```sh
 kubectl apply --filename ./prizmdoc-viewer-app --namespace prizmdoc
 ```
 
 You can review deployed resources with command:
+
 ```sh
 kubectl get all --namespace prizmdoc
 ```
@@ -51,6 +56,7 @@ kubectl get all --namespace prizmdoc
 ### 3. Check health
 
 It may take a few minutes to pull all the container images and complete the deployment. But, once fully started, you can use the following HTTP requests to check application health:
+
 * `GET http://<your-ingress-address>:<port>/prizmdoc-server/PCCIS/V1/Service/Current/Health` should return HTTP 200, indicating PrizmDoc Server is healthy (while starting, this request will return nothing or an error).
 * `GET http://<your-ingress-address>:<port>/prizmdoc-application-services/health` should return HTTP 200, indicating PrizmDoc Application Services component is healthy.
 
@@ -65,7 +71,6 @@ Now you can run one of [Sample Applications] with your PrizmDoc Viewer deployed 
 * [Copyright Information]
 * [PrizmDoc Viewer Overview]
 * [PrizmDoc Kubernetes Guidance]
-
 
 [kubectl]: https://kubernetes.io/docs/reference/kubectl/kubectl/
 [kubeconfig]: https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
