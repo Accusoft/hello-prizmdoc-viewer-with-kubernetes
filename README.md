@@ -25,7 +25,7 @@ This example provides manifest files that allow you to get a PrizmDoc Viewer clu
 
 ### 1. Customize your configuration
 
-All manifest files can be found in the [prizmdoc-viewer-app](./prizmdoc-viewer-app) folder. See [Deployment to Kubernetes Guidance] documentation for informantion about resources used in the manifest files.
+All manifest files can be found in the [prizmdoc-viewer-app](./prizmdoc-viewer-app) folder. See [Deployment to Kubernetes Guidance] documentation for information about resources used in the manifest files.
 
 PrizmDoc Server is configured with `prizmdoc-server-config` in the [prizmdoc-server.yaml](prizmdoc-viewer-app/prizmdoc-server.yaml) manifest file. See the [Configure the PrizmDoc Server] for information about available options. At a minimum, for a production deployment, you will want to at least configure your license with `license.key` and `license.solutionName`.
 
