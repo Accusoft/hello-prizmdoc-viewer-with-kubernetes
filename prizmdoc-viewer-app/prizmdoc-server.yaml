@@ -225,6 +225,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: '120'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '120'
     nginx.ingress.kubernetes.io/rewrite-target: /$1
+    ngnix.ingress.kubernetes.io/upstream-keepalive-timeout: '0'
     nginx.ingress.kubernetes.io/use-regex: 'true'    
 spec:
   rules:
