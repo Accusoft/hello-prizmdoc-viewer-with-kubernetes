@@ -86,7 +86,7 @@ spec:
             - bash
             - '-c'
             - for i in {0..30}; do sleep 5; if mysql --user=user --password=password --host=mysql.prizmdoc.svc.cluster.local --connect-timeout=3 --database=prizmdb --execute="SELECT 1;"; then break; fi; echo $?; done;
-          image: bitnami/mysql:5.7.36-debian-10-r13
+          image: docker.io/bitnami/mysql:8.0-debian-12
           imagePullPolicy: IfNotPresent
           resources:
             limits:

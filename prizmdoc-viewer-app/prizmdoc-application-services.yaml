@@ -86,7 +86,7 @@ spec:
         # Wait for the MySQL to become ready.
         # The Prizmdoc Application Services may fail to start if MySQL is unavailable.
         - name: wait-mysql
-          image: bitnami/mysql:5.7.36-debian-10-r13
+          image: docker.io/bitnami/mysql:8.0-debian-12
           imagePullPolicy: IfNotPresent
           command:
             - bash
