@@ -88,7 +88,7 @@ spec:
     spec:
       containers:
         - name: mysql
-          image: docker.io/bitnami/mysql:5.7.36-debian-10-r13
+          image: docker.io/bitnami/mysql:8.0-debian-12
           imagePullPolicy: IfNotPresent
           env:
             - name: MYSQL_ROOT_PASSWORD
